@@ -12,7 +12,7 @@ export default function QuizQuestion({
   return (
     <fieldset className="bg-green-50 rounded-2xl border-2 mt-2 mb-2 p-5 flex flex-col">
       <h2 className="mt-0">{questionText}</h2>
-      {answerChoices.map((answer, index) => (
+      {answerChoices.map((answer) => (
         <AnswerChoice questionId={questionId} answer={answer} />
       ))}
     </fieldset>
