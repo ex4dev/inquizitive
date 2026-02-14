@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { getUserOctokit } from "./octokit.ts";
@@ -8,6 +9,8 @@ import { getUserOctokit } from "./octokit.ts";
 const app = new Hono();
 
 const AUTH_COOKIE_NAME = "inquizitive-user";
+
+app.use(cors());
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
