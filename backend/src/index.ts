@@ -21,7 +21,7 @@ app.post("/api/github/webhook", (c) => {
 app.get("/api/auth/login", (c) => {
   const state = ""; // TODO
   return c.redirect(
-    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${state}`,
+    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${state}&scope=read:user user:email`,
   );
 });
 
