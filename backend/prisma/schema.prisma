@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  engineType = "client"
-  output   = "../src/generated/prisma"
+  provider               = "prisma-client"
+  engineType             = "client"
+  output                 = "../src/generated/prisma"
   runtime                = "nodejs"
   moduleFormat           = "esm"
   generatedFileExtension = "ts"
@@ -13,7 +13,30 @@ datasource db {
 }
 
 model User {
-    id Int @id @default(autoincrement())
-    name String
-    email String @unique
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+
+  githubUserId    Int
+  githubUserLogin String
+}
+
+model Quiz {
+  id           Int            @id @default(autoincrement())
+  githubUserId Int
+  questions    QuizQuestion[]
+}
+
+model QuizQuestion {
+  id Int @id @default(autoincrement())
+
+  quiz   Quiz @relation(fields: [quizId], references: [id])
+  quizId Int
+
+  questionText String
+
+  /// An array of answer choices formatted as strings
+  answerChoices Json
+
+  answer String
 }

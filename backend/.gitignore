@@ -29,3 +29,6 @@ lerna-debug.log*
 
 dist
 src/generated
+*.db
+*.db-shm
+*.db-wal
