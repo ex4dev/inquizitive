@@ -2,18 +2,22 @@
   "name": "backend",
   "type": "module",
   "scripts": {
-    "dev": "node --experimental-transform-types --env-file .env --watch src/index.ts",
-    "build": "tsc",
+    "dev": "node --experimental-strip-types --env-file .env --watch src/index.ts",
+    "build": "DATABASE_URL=a prisma generate && tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
     "@octokit/auth-app": "^8.2.0",
+    "@prisma/adapter-libsql": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "dotenv": "^17.3.1",
     "hono": "^4.11.9",
     "octokit": "^5.0.5"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.19.33",
+    "prisma": "^7.4.0",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3"
   }
