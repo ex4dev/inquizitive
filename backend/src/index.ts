@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { getUserOctokit } from "./octokit.ts";
@@ -78,6 +78,17 @@ app.get("/api/user/me", async (c) => {
   }
 
   return c.json(session?.user);
+});
+
+app.post("/api/auth/logout", async (c) => {
+  const sessionToken = deleteCookie(c, AUTH_COOKIE_NAME);
+
+  if (!sessionToken) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  await db.session.delete({ where: { token: sessionToken } });
+  return c.json({ success: true });
 });
 
 serve(
