@@ -1,7 +1,13 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
+import { randomUUID } from "node:crypto";
+import { db } from "./db.ts";
+import { getUserOctokit } from "./octokit.ts";
 
 const app = new Hono();
+
+const AUTH_COOKIE_NAME = "inquizitive-user";
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
@@ -27,15 +33,45 @@ app.get("/api/github/install", (c) => {
 
 app.get("/api/auth/callback", async (c) => {
   // GitHub OAuth callback
-  // A `code` URL parameter exists with the OAuth code
   // TODO verify `state`
-  const response = await fetch(
-    `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${c.req.query("code")!}`,
-    {
-      method: "POST",
+  const octokit = await getUserOctokit(c.req.query("code")!);
+  const githubUser = await octokit.rest.users.getAuthenticated();
+
+  const user = await db.user.upsert({
+    create: {
+      email: githubUser.data.email!,
+      name: githubUser.data.name ?? githubUser.data.login,
+      githubUserId: githubUser.data.id,
+      githubUserLogin: githubUser.data.login,
     },
-  );
-  return c.text("");
+    update: {
+      email: githubUser.data.email!,
+      name: githubUser.data.name ?? githubUser.data.login,
+      githubUserLogin: githubUser.data.login,
+    },
+    where: {
+      githubUserId: githubUser.data.id,
+    },
+  });
+
+  const session = await db.session.create({
+    data: { token: randomUUID(), user: { connect: { id: user.id } } },
+  });
+
+  setCookie(c, AUTH_COOKIE_NAME, session.token);
+
+  return c.redirect(process.env.FRONTEND_URL!);
+});
+
+app.get("/api/user/me", async (c) => {
+  const sessionToken = getCookie(c, AUTH_COOKIE_NAME);
+
+  const session = await db.session.findUnique({
+    where: { token: sessionToken },
+    include: { user: true },
+  });
+
+  return c.json(session?.user);
 });
 
 serve(

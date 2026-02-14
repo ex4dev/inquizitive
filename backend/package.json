@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "node --experimental-strip-types --env-file .env --watch src/index.ts",
     "build": "LOCAL_DATABASE_URL=a prisma generate && tsc",
+    "generate": "LOCAL_DATABASE_URL=a prisma generate",
     "start": "node dist/index.js"
   },
   "dependencies": {
