@@ -56,7 +56,7 @@ app.get("/api/auth/callback", async (c) => {
     data: { token: randomUUID(), user: { connect: { id: user.id } } },
   });
 
-  setCookie(c, AUTH_COOKIE_NAME, session.token);
+  setCookie(c, AUTH_COOKIE_NAME, session.token, { httpOnly: true });
 
   return c.redirect(process.env.FRONTEND_URL!);
 });
@@ -64,10 +64,18 @@ app.get("/api/auth/callback", async (c) => {
 app.get("/api/user/me", async (c) => {
   const sessionToken = getCookie(c, AUTH_COOKIE_NAME);
 
+  if (!sessionToken) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
   const session = await db.session.findUnique({
     where: { token: sessionToken },
     include: { user: true },
   });
+
+  if (session === null) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
 
   return c.json(session?.user);
 });
