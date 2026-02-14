@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import QuizQuestion from "./components/QuizQuestion";
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const prName = "Pull Request Name";
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+    <div className="prose m-auto mt-5">
+      <h1>Inquizitive - {prName}</h1>
+      <p>
+        Please take a short quiz to verify the authenticity of this PR. This
+        helps our maintainers to streamline the review process.
       </p>
-    </>
-  )
+      <form>
+        <QuizQuestion
+          questionId="q1"
+          questionText="Question text 1"
+          answerChoices={["Answer 1", "Answer 2", "Answer 3"]}
+        />
+        <QuizQuestion
+          questionId="q2"
+          questionText="Question text 2"
+          answerChoices={["Answer 4", "Answer 5", "Answer 6"]}
+        />
+        <input
+          type="submit"
+          value="Submit"
+          className="bg-green-400 p-3 rounded-xl"
+        />
+      </form>
+    </div>
+  );
 }
 
-export default App
+export default App;
