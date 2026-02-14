@@ -21,7 +21,7 @@ app.post("/api/github/webhook", (c) => {
 app.get("/api/auth/login", (c) => {
   const state = ""; // TODO
   return c.redirect(
-    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${state}&scope=read:user user:email`,
+    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${state}`,
   );
 });
 
@@ -39,13 +39,11 @@ app.get("/api/auth/callback", async (c) => {
 
   const user = await db.user.upsert({
     create: {
-      email: githubUser.data.email!,
       name: githubUser.data.name ?? githubUser.data.login,
       githubUserId: githubUser.data.id,
       githubUserLogin: githubUser.data.login,
     },
     update: {
-      email: githubUser.data.email!,
       name: githubUser.data.name ?? githubUser.data.login,
       githubUserLogin: githubUser.data.login,
     },
