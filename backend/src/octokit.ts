@@ -20,7 +20,7 @@ export async function getUserOctokit(oauthCode: string) {
   return (await appOctokit.auth({
     type: "oauth-user",
     code: oauthCode,
-    factory: (options) => {
+    factory: (options: unknown) => {
       return new Octokit({
         authStrategy: createOAuthUserAuth,
         auth: options,

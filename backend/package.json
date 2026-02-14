@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --experimental-strip-types --env-file .env --watch src/index.ts",
-    "build": "DATABASE_URL=a prisma generate && tsc",
+    "build": "LOCAL_DATABASE_URL=a prisma generate && tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
