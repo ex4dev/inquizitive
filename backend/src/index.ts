@@ -80,12 +80,10 @@ app.post("/api/github/webhook", async (c) => {
           installationId: json.installation.id,
           questions: {
             createMany: {
-              data: shuffle(
-                quizRes.questions.map((q) => ({
-                  questionText: q.question,
-                  answerChoices: q.choices,
-                })),
-              ),
+              data: quizRes.questions.map((q) => ({
+                questionText: q.question,
+                answerChoices: shuffle(q.choices),
+              })),
             },
           },
         },
@@ -98,7 +96,7 @@ app.post("/api/github/webhook", async (c) => {
         body:
           "Please take a short quiz to verify the authenticity of this PR. This helps our maintainers to streamline the review process. Take the quiz here: " +
           process.env.FRONTEND_URL +
-          "/quiz?id=" +
+          "quiz?id=" +
           quiz.id,
         owner: quiz.owner,
         repo: quiz.repo,

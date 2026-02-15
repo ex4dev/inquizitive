@@ -3,7 +3,7 @@ import "../App.css";
 
 export default function MaintainerSetup() {
   return (
-    <div className="prose">
+    <div className="prose prose-invert">
       <h1>Maintainer setup!!!</h1>
       <a href={BASE_URL + "api/github/install"}>Install it!!!</a>
     </div>

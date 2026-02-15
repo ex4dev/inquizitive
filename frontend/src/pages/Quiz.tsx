@@ -25,7 +25,7 @@ export function Quiz({ id }: { id: number }) {
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <div className="prose m-auto mt-5">
+    <div className="prose prose-invert m-auto mt-5">
       <h1>Inquizitive - {quiz?.prName}</h1>
       <p>
         Please take a short quiz to verify the authenticity of this PR. This
