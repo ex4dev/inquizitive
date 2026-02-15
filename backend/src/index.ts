@@ -5,12 +5,8 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
-import {
-  appOctokit,
-  getInstallationOctokit,
-  getUserOctokit,
-} from "./octokit.ts";
-import type { JsonArray, JsonValue } from "@prisma/client/runtime/client";
+import { getInstallationOctokit, getUserOctokit } from "./octokit.ts";
+import type { JsonArray } from "@prisma/client/runtime/client";
 import { sendDiffToGemini } from "./geminiScript.ts";
 
 const app = new Hono();
@@ -108,7 +104,9 @@ app.get("/api/quiz/:quizId", async (c) => {
     return c.json({ error: "Not found" }, 404);
   }
 
-  const perms = await appOctokit.rest.repos.getCollaboratorPermissionLevel({
+  const perms = await getInstallationOctokit(
+    quiz.installationId,
+  ).rest.repos.getCollaboratorPermissionLevel({
     owner: quiz.owner,
     repo: quiz.repo,
     username: session.user.githubUserLogin,

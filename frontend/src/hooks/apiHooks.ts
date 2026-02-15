@@ -27,7 +27,10 @@ interface Question {
 export function useUser() {
   const x = useQuery<User>({
     queryKey: ["user"],
-    queryFn: () => fetch(BASE_URL + "api/user/me").then((res) => res.json()),
+    queryFn: () =>
+      fetch(BASE_URL + "api/user/me", { credentials: "include" }).then((res) =>
+        res.json(),
+      ),
   });
 
   if (x.data && "error" in x.data && x.data.error === "Unauthorized") {
@@ -40,6 +43,9 @@ export function useUser() {
 export function useQuiz(id: number) {
   return useQuery<Quiz>({
     queryKey: ["quiz", id],
-    queryFn: () => fetch(BASE_URL + "api/quiz/" + id).then((res) => res.json()),
+    queryFn: () =>
+      fetch(BASE_URL + "api/quiz/" + id, { credentials: "include" }).then(
+        (res) => res.json(),
+      ),
   });
 }
