@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router";
+import { BASE_URL } from "../App";
 import QuizQuestion from "../components/QuizQuestion";
 import { useQuiz } from "../hooks/apiHooks";
 
@@ -43,7 +44,7 @@ export function Quiz({ id }: { id: number }) {
           type="submit"
           value="Submit"
           formMethod="post"
-          formAction="https://inquizitive-rho.vercel.app/api/submit"
+          formAction={BASE_URL + "api/submit/" + id}
           className="bg-green-400 p-3 rounded-xl"
         />
       </form>
