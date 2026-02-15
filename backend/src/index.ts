@@ -114,10 +114,12 @@ app.get("/api/quiz/:quizId", async (c) => {
     repo: quiz.repo,
     questions: quiz.questions.map((q) => ({
       id: q.id,
-      choices: q.answerChoices,
+      choices: (q.answerChoices as any[]).map((choice) => choice.question),
       text: q.questionText,
       // Only show answers if the person viewing the quiz has write access to the repository that the quiz was created for
-      ...(canWrite ? { answer: q.answer } : {}),
+      ...(canWrite
+        ? { answer: getCorrectAnswer(q.answerChoices as JsonArray) }
+        : {}),
     })),
   });
 });
