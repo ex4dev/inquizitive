@@ -23,7 +23,7 @@ app.use(async (c, next) => {
   c.header("Access-Control-Allow-Credentials", "true");
   c.header("Access-Control-Allow-Headers", "Cookie");
   c.header("Access-Control-Allow-Methods", "GET, POST");
-  c.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  c.header("Access-Control-Allow-Origin", c.req.header("Origin"));
   await next();
 });
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
