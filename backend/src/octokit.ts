@@ -28,3 +28,16 @@ export async function getUserOctokit(oauthCode: string) {
     },
   })) as Octokit;
 }
+
+export function getInstallationOctokit(installationId: number) {
+  return new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
+      appId: parseInt(process.env.GITHUB_APP_ID!),
+      privateKey,
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      installationId,
+    },
+  });
+}

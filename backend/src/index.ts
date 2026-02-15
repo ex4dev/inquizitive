@@ -5,7 +5,11 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
-import { appOctokit, getUserOctokit } from "./octokit.ts";
+import {
+  appOctokit,
+  getInstallationOctokit,
+  getUserOctokit,
+} from "./octokit.ts";
 import type { JsonArray, JsonValue } from "@prisma/client/runtime/client";
 import { sendDiffToGemini } from "./geminiScript.ts";
 
@@ -44,10 +48,12 @@ app.post("/api/github/webhook", async (c) => {
       const userId = json.pull_request.user.id;
       const prName = json.pull_request.title;
 
+      console.log("Sending diff to Gemini");
       const quizRes = JSON.parse(
         await sendDiffToGemini(patch, process.env.GEMINI_API_KEY!),
       ) as QuizResponse;
 
+      console.log("Saving quiz data in DB");
       const quiz = await db.quiz.create({
         data: {
           githubUserId: userId,
@@ -55,6 +61,7 @@ app.post("/api/github/webhook", async (c) => {
           issueNumber: json.pull_request.number,
           owner: json.repository.owner.login,
           repo: json.repository.name,
+          installationId: json.installation.id,
           questions: {
             createMany: {
               data: quizRes.questions.map((q) => ({
@@ -66,7 +73,10 @@ app.post("/api/github/webhook", async (c) => {
         },
       });
 
-      await appOctokit.rest.issues.createComment({
+      console.log("Sending initial comment");
+      await getInstallationOctokit(
+        json.installation.id,
+      ).rest.issues.createComment({
         body:
           "Please take a short quiz to verify the authenticity of this PR. This helps our maintainers to streamline the review process. Take the quiz here: " +
           process.env.FRONTEND_URL +
@@ -240,9 +250,10 @@ app.post("/api/submit/:quizId", async (c) => {
       numCorrect++;
   });
 
+  const oct = getInstallationOctokit(quiz.installationId);
   // 80% to pass
   if (numCorrect / quiz.questions.length >= 0.8) {
-    await appOctokit.rest.issues.createComment({
+    await oct.rest.issues.createComment({
       body:
         "Contributor passed the verification quiz (" +
         numCorrect +
@@ -253,7 +264,7 @@ app.post("/api/submit/:quizId", async (c) => {
       repo: quiz.repo,
       issue_number: quiz.issueNumber,
     });
-    await appOctokit.rest.issues.addLabels({
+    await oct.rest.issues.addLabels({
       owner: quiz.owner,
       repo: quiz.repo,
       issue_number: quiz.issueNumber,
@@ -261,7 +272,7 @@ app.post("/api/submit/:quizId", async (c) => {
     });
   } else {
     // Failed :(
-    await appOctokit.rest.issues.createComment({
+    await oct.rest.issues.createComment({
       body:
         "Contributor failed the verification quiz (" +
         numCorrect +
