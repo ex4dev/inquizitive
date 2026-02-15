@@ -175,11 +175,7 @@ app.get("/api/auth/callback", async (c) => {
     data: { token: randomUUID(), user: { connect: { id: user.id } } },
   });
 
-  setCookie(c, AUTH_COOKIE_NAME, session.token, {
-    httpOnly: true,
-    sameSite: "None",
-    secure: true,
-  });
+  setCookie(c, AUTH_COOKIE_NAME, session.token, { httpOnly: true });
 
   return c.redirect(process.env.FRONTEND_URL!);
 });

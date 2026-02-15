@@ -1,4 +1,4 @@
-export const BASE_URL = "https://inquizitive-rho.vercel.app/";
+export const BASE_URL = "/";
 
 function App() {}
 
