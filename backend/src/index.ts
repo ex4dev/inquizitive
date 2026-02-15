@@ -32,6 +32,21 @@ app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
+function shuffle(array: any[]): any[] {
+  let currentIndex = array.length;
+
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+}
+
 app.post("/api/github/webhook", async (c) => {
   // Handle GitHub webhook payloads
   const signature = c.req.header("x-hub-signature-256");
@@ -65,10 +80,12 @@ app.post("/api/github/webhook", async (c) => {
           installationId: json.installation.id,
           questions: {
             createMany: {
-              data: quizRes.questions.map((q) => ({
-                questionText: q.question,
-                answerChoices: q.choices,
-              })),
+              data: shuffle(
+                quizRes.questions.map((q) => ({
+                  questionText: q.question,
+                  answerChoices: q.choices,
+                })),
+              ),
             },
           },
         },
