@@ -34,7 +34,10 @@ export function useUser() {
   });
 
   if (x.data && "error" in x.data && x.data.error === "Unauthorized") {
-    window.location.href = BASE_URL + "api/auth/login";
+    window.location.href =
+      BASE_URL +
+      "api/auth/login?return=" +
+      encodeURIComponent(window.location.pathname + window.location.search);
   }
 
   return x;
