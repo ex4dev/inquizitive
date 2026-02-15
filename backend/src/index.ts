@@ -32,6 +32,21 @@ app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
+function shuffle(array: any[]): any[] {
+  let currentIndex = array.length;
+
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+  return array;
+}
+
 app.post("/api/github/webhook", async (c) => {
   // Handle GitHub webhook payloads
   const signature = c.req.header("x-hub-signature-256");
@@ -67,7 +82,7 @@ app.post("/api/github/webhook", async (c) => {
             createMany: {
               data: quizRes.questions.map((q) => ({
                 questionText: q.question,
-                answerChoices: q.choices,
+                answerChoices: shuffle(q.choices),
               })),
             },
           },
@@ -81,7 +96,7 @@ app.post("/api/github/webhook", async (c) => {
         body:
           "Please take a short quiz to verify the authenticity of this PR. This helps our maintainers to streamline the review process. Take the quiz here: " +
           process.env.FRONTEND_URL +
-          "/quiz?id=" +
+          "quiz?id=" +
           quiz.id,
         owner: quiz.owner,
         repo: quiz.repo,
@@ -244,8 +259,8 @@ app.post("/api/submit/:quizId", async (c) => {
 
   let numCorrect = 0;
 
-  quiz.questions.forEach((question, index) => {
-    const userAnswer = data.get("q" + index); // will be formatted like <question id>_<answer idx>
+  quiz.questions.forEach((question) => {
+    const userAnswer = data.get(question.id.toString()); // will be formatted like <question id>_<answer idx>
     if (!userAnswer) {
       return c.text("You must answer all questions");
     }
