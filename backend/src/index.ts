@@ -4,20 +4,43 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
-import { getUserOctokit } from "./octokit.ts";
+import { appOctokit, getUserOctokit } from "./octokit.ts";
+import { Webhooks } from "@octokit/webhooks";
 
 const app = new Hono();
 
 const AUTH_COOKIE_NAME = "inquizitive-user";
 
 app.use(cors());
+const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
-app.post("/api/github/webhook", (c) => {
+app.post("/api/github/webhook", async (c) => {
   // Handle GitHub webhook payloads
+  const signature = c.req.header("x-hub-signature-256");
+  const isValid = await webhooks.verify(await c.req.text(), signature!);
+  if (!isValid) {
+    return c.text("Invalid", 401);
+  }
+  const event = c.req.header("x-github-event");
+  if (event === "pull_request") {
+    const json = await c.req.json();
+    if (json.action === "opened") {
+      const patchResponse = await fetch(json.pull_request.patch_url);
+      const patch = await patchResponse.text();
+      // TODO AI
+      const userId = json.pull_request.user.id;
+      await appOctokit.rest.issues.createComment({
+        body: "take this quiz or else: <INSERT THE LINK>",
+        owner: json.repository.owner.login,
+        repo: json.repository.name,
+        issue_number: json.pull_request.number,
+      });
+    }
+  }
   return c.text("");
 });
 
