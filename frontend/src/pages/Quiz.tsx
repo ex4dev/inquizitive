@@ -1,16 +1,13 @@
-import React from "react";
+import { useMemo } from "react";
+import { useLocation } from "react-router";
 import QuizQuestion from "../components/QuizQuestion";
 import { useQuiz } from "../hooks/apiHooks";
-import { useLocation } from "react-router";
-
-// /api/auth/login
-// /api/user/me
 
 // https://v5.reactrouter.com/web/example/query-parameters
 function useQuery() {
   const { search } = useLocation();
 
-  return React.useMemo(() => new URLSearchParams(search), [search]);
+  return useMemo(() => new URLSearchParams(search), [search]);
 }
 
 export default function QuizPage() {
@@ -39,7 +36,7 @@ export function Quiz({ id }: { id: number }) {
             questionId={q.id.toString()}
             key={q.id}
             questionText={q.text}
-            answerChoices={q.answerChoices}
+            answerChoices={q.choices}
           />
         ))}
         <input

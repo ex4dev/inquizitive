@@ -19,7 +19,7 @@ interface Quiz {
 
 interface Question {
   id: number;
-  answerChoices: string[];
+  choices: string[];
   text: string;
   answer?: string;
 }

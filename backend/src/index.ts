@@ -125,6 +125,7 @@ app.get("/api/quiz/:quizId", async (c) => {
     issueNumber: quiz.issueNumber,
     owner: quiz.owner,
     repo: quiz.repo,
+    prName: quiz.prName,
     questions: quiz.questions.map((q) => ({
       id: q.id,
       choices: (q.answerChoices as any[]).map((choice) => choice.description),
