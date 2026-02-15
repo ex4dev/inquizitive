@@ -26,7 +26,8 @@ function buildPayload(diff: string) {
          25% chance of being a, 
          25% chance of being b,
          25% chance of being c,
-         and 25% chance of being d. \n
+         and 25% chance of being d. 
+         DO NOT INDICATE WHETHER AN ANSWER CHOICE IS THE CORRECT ONE IN THE TEXT DESCRIPTION OF A CHOICE\n
 
 
     Diff: ${diff}`;
