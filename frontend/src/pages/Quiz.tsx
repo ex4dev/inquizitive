@@ -29,6 +29,8 @@ export default function Quiz({ id }: { id: number }) {
         <input
           type="submit"
           value="Submit"
+          formMethod="post"
+          formAction="https://inquizitive-rho.vercel.app/api/submit"
           className="bg-green-400 p-3 rounded-xl"
         />
       </form>

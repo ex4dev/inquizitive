@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { appOctokit, getUserOctokit } from "./octokit.ts";
+import type { JsonArray, JsonValue } from "@prisma/client/runtime/client";
 
 const app = new Hono();
 
@@ -162,6 +163,80 @@ app.post("/api/auth/logout", async (c) => {
 
   await db.session.delete({ where: { token: sessionToken } });
   return c.json({ success: true });
+});
+
+function getCorrectAnswer(answerChoices: JsonArray): number {
+  for (let i = 0; i < answerChoices.length; i++) {
+    if ((answerChoices[i] as any)?.correct) return i;
+  }
+  return -1;
+}
+
+app.post("/api/submit/:quizId", async (c) => {
+  const quizId = c.req.param("quizId");
+  const id = parseInt(quizId);
+
+  const session = await getSession(c);
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const quiz = await db.quiz.findUnique({
+    where: { id: id },
+    include: { questions: true },
+  });
+  if (!quiz) {
+    return c.json({ error: "Not found" }, 404);
+  }
+
+  const data = await c.req.formData();
+
+  let numCorrect = 0;
+
+  quiz.questions.forEach((question, index) => {
+    const userAnswer = data.get("q" + index); // will be formatted like <question id>_<answer idx>
+    if (!userAnswer) {
+      return c.text("You must answer all questions");
+    }
+    const userAnswerIdx = +userAnswer.toString().split("_")[1];
+    if (userAnswerIdx == getCorrectAnswer(question.answerChoices as JsonArray))
+      numCorrect++;
+  });
+
+  // 80% to pass
+  if (numCorrect / quiz.questions.length >= 0.8) {
+    await appOctokit.rest.issues.createComment({
+      body:
+        "Contributor passed the verification quiz (" +
+        numCorrect +
+        "/" +
+        quiz.questions.length +
+        ").",
+      owner: quiz.owner,
+      repo: quiz.repo,
+      issue_number: quiz.issueNumber,
+    });
+    await appOctokit.rest.issues.addLabels({
+      owner: quiz.owner,
+      repo: quiz.repo,
+      issue_number: quiz.issueNumber,
+      labels: ["Passed Quiz"],
+    });
+  } else {
+    // Failed :(
+    await appOctokit.rest.issues.createComment({
+      body:
+        "Contributor failed the verification quiz (" +
+        numCorrect +
+        "/" +
+        quiz.questions.length +
+        ").",
+      owner: quiz.owner,
+      repo: quiz.repo,
+      issue_number: quiz.issueNumber,
+    });
+  }
+  return c.newResponse(null, 200);
 });
 
 serve(
