@@ -36,6 +36,7 @@ model Quiz {
   owner        String
   repo         String
   issueNumber  Int
+  prName String
 }
 
 model QuizQuestion {

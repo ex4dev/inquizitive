@@ -1,43 +1,31 @@
-import { BASE_URL } from "../App";
 import QuizQuestion from "../components/QuizQuestion";
-import { useQuery } from "@tanstack/react-query";
+import { useQuiz } from "../hooks/apiHooks";
 
 // /api/auth/login
 // /api/user/me
 
-export default function Quiz() {
-  const prName = "Pull Request Name";
-
-  const { isLoading, error, data } = useQuery({
-    queryKey: ["repoData"],
-    queryFn: () => fetch(BASE_URL + "api/user/me").then((res) => res.json()),
-  });
+export default function Quiz({ id }: { id: number }) {
+  const { isLoading, error, data: quiz } = useQuiz(id);
 
   if (isLoading) return <></>;
   if (error) return <p>Error: {error.message}</p>;
 
-  if (data.error === "Unauthorized") {
-    window.location.href = BASE_URL + "/api/auth/login";
-  }
-
   return (
     <div className="prose m-auto mt-5">
-      <h1>Inquizitive - {prName}</h1>
+      <h1>Inquizitive - {quiz?.prName}</h1>
       <p>
         Please take a short quiz to verify the authenticity of this PR. This
         helps our maintainers to streamline the review process.
       </p>
       <form>
-        <QuizQuestion
-          questionId="q1"
-          questionText="Question text 1"
-          answerChoices={["Answer 1", "Answer 2", "Answer 3"]}
-        />
-        <QuizQuestion
-          questionId="q2"
-          questionText="Question text 2"
-          answerChoices={["Answer 4", "Answer 5", "Answer 6"]}
-        />
+        {quiz?.questions?.map((q) => (
+          <QuizQuestion
+            questionId={q.id.toString()}
+            key={q.id}
+            questionText={q.text}
+            answerChoices={q.answerChoices}
+          />
+        ))}
         <input
           type="submit"
           value="Submit"

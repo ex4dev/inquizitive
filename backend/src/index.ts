@@ -33,6 +33,7 @@ app.post("/api/github/webhook", async (c) => {
       const patch = await patchResponse.text();
       // TODO AI
       const userId = json.pull_request.user.id;
+      const prName = json.pull_request.title;
       await appOctokit.rest.issues.createComment({
         body: "take this quiz or else: <INSERT THE LINK>",
         owner: json.repository.owner.login,
