@@ -1,11 +1,11 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import { Webhooks } from "@octokit/webhooks";
+import { Hono, type Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { appOctokit, getUserOctokit } from "./octokit.ts";
-import { Webhooks } from "@octokit/webhooks";
 
 const app = new Hono();
 
@@ -42,6 +42,47 @@ app.post("/api/github/webhook", async (c) => {
     }
   }
   return c.text("");
+});
+
+app.get("/api/quiz/:quizId", async (c) => {
+  const quizId = c.req.param("quizId");
+  const id = parseInt(quizId);
+
+  const session = await getSession(c);
+  if (!session) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const quiz = await db.quiz.findUnique({
+    where: { id: id },
+    include: { questions: true },
+  });
+  if (!quiz) {
+    return c.json({ error: "Not found" }, 404);
+  }
+
+  const perms = await appOctokit.rest.repos.getCollaboratorPermissionLevel({
+    owner: quiz.owner,
+    repo: quiz.repo,
+    username: session.user.githubUserLogin,
+  });
+
+  const canWrite =
+    perms.data.permission === "write" || perms.data.permission === "admin"; // data.permission can be "admin", "write", "read", or "none"
+
+  return c.json({
+    id: quiz.id,
+    issueNumber: quiz.issueNumber,
+    owner: quiz.owner,
+    repo: quiz.repo,
+    questions: quiz.questions.map((q) => ({
+      id: q.id,
+      choices: q.answerChoices,
+      text: q.questionText,
+      // Only show answers if the person viewing the quiz has write access to the repository that the quiz was created for
+      ...(canWrite ? { answer: q.answer } : {}),
+    })),
+  });
 });
 
 app.get("/api/auth/login", (c) => {
@@ -87,11 +128,11 @@ app.get("/api/auth/callback", async (c) => {
   return c.redirect(process.env.FRONTEND_URL!);
 });
 
-app.get("/api/user/me", async (c) => {
+async function getSession(c: Context) {
   const sessionToken = getCookie(c, AUTH_COOKIE_NAME);
 
   if (!sessionToken) {
-    return c.json({ error: "Unauthorized" }, 401);
+    return null;
   }
 
   const session = await db.session.findUnique({
@@ -99,6 +140,11 @@ app.get("/api/user/me", async (c) => {
     include: { user: true },
   });
 
+  return session;
+}
+
+app.get("/api/user/me", async (c) => {
+  const session = await getSession(c);
   if (session === null) {
     return c.json({ error: "Unauthorized" }, 401);
   }
