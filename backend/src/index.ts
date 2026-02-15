@@ -244,8 +244,8 @@ app.post("/api/submit/:quizId", async (c) => {
 
   let numCorrect = 0;
 
-  quiz.questions.forEach((question, index) => {
-    const userAnswer = data.get("q" + index); // will be formatted like <question id>_<answer idx>
+  quiz.questions.forEach((question) => {
+    const userAnswer = data.get(question.id.toString()); // will be formatted like <question id>_<answer idx>
     if (!userAnswer) {
       return c.text("You must answer all questions");
     }
