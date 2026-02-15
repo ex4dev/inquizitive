@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useLocation } from "react-router";
 import { BASE_URL } from "../App";
+import { CurrentUser } from "../components/CurrentUser";
 import QuizQuestion from "../components/QuizQuestion";
 import { useQuiz } from "../hooks/apiHooks";
 
@@ -26,7 +27,10 @@ export function Quiz({ id }: { id: number }) {
 
   return (
     <div className="prose prose-invert m-auto mt-5">
-      <p className="mb-0">Inquizitive</p>
+      <p className="mb-0">
+        Inquizitive
+        <CurrentUser />
+      </p>
       <h1 className="playfair-display mb-0">{quiz?.prName}</h1>
       <p className="mb-8">
         Please take a short quiz to verify the authenticity of this PR. This
