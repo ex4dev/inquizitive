@@ -30,7 +30,7 @@ export function useUser() {
     queryFn: () => fetch(BASE_URL + "api/user/me").then((res) => res.json()),
   });
 
-  if (x.data?.error === "Unauthorized") {
+  if (x.data && "error" in x.data && x.data.error === "Unauthorized") {
     window.location.href = BASE_URL + "/api/auth/login";
   }
 

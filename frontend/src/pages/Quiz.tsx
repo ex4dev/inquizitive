@@ -1,10 +1,26 @@
+import React from "react";
 import QuizQuestion from "../components/QuizQuestion";
 import { useQuiz } from "../hooks/apiHooks";
+import { useLocation } from "react-router";
 
 // /api/auth/login
 // /api/user/me
 
-export default function Quiz({ id }: { id: number }) {
+// https://v5.reactrouter.com/web/example/query-parameters
+function useQuery() {
+  const { search } = useLocation();
+
+  return React.useMemo(() => new URLSearchParams(search), [search]);
+}
+
+export default function QuizPage() {
+  const query = useQuery();
+  const id = query.get("id");
+  if (!id) return <p>Please specify a quiz ID!</p>;
+  return <Quiz id={+id} />;
+}
+
+export function Quiz({ id }: { id: number }) {
   const { isLoading, error, data: quiz } = useQuiz(id);
 
   if (isLoading) return <></>;
