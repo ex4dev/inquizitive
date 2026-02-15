@@ -20,7 +20,7 @@ type QuizResponse = {
   }[];
 };
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: process.env.FRONTEND_URL!, credentials: true }));
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
 
 app.get("/", (c) => {
