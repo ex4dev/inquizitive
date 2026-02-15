@@ -303,7 +303,7 @@ app.post("/api/submit/:quizId", async (c) => {
       issue_number: quiz.issueNumber,
     });
   }
-  return c.newResponse(null, 200);
+  return c.redirect(process.env.FRONTEND_URL! + "received");
 });
 
 serve(
