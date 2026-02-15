@@ -154,7 +154,7 @@ app.get("/api/quiz/:quizId", async (c) => {
 });
 
 app.get("/api/auth/login", (c) => {
-  const state = ""; // TODO
+  const state = encodeURIComponent(c.req.query("return") ?? "");
   return c.redirect(
     `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${state}`,
   );
@@ -171,6 +171,9 @@ app.get("/api/auth/callback", async (c) => {
   // TODO verify `state`
   const octokit = await getUserOctokit(c.req.query("code")!);
   const githubUser = await octokit.rest.users.getAuthenticated();
+
+
+  const returnURL = c.req.query("state") ?? "";
 
   const user = await db.user.upsert({
     create: {
@@ -193,7 +196,7 @@ app.get("/api/auth/callback", async (c) => {
 
   setCookie(c, AUTH_COOKIE_NAME, session.token, { httpOnly: true });
 
-  return c.redirect(process.env.FRONTEND_URL!);
+  return c.redirect(process.env.FRONTEND_URL! + returnURL);
 });
 
 async function getSession(c: Context) {
