@@ -49,6 +49,4 @@ model QuizQuestion {
 
   /// An array of answer choices formatted as strings
   answerChoices Json
-
-  answer String
 }

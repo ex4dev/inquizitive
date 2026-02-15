@@ -1,23 +1,15 @@
-import fs from "fs/promises";
-
 /**
  * Sends .diff file to Gemini and returns structured JSON
  * @param diffAsString
  * @param apiKey
  * @returns
  */
-export async function sendDiffToGemini(diffAsString, apiKey) {
-  let data = "";
-  try {
-    const payload = buildPayload(diffAsString);
-    data = generateGeminiResponse(payload, apiKey);
-  } catch (e) {
-    console.log(e);
-  }
-  return data;
+export async function sendDiffToGemini(diff: string, apiKey: string) {
+  const payload = buildPayload(diff);
+  return generateGeminiResponse(payload, apiKey);
 }
 
-function buildPayload(diff) {
+function buildPayload(diff: string) {
   const prompt = `
         Generate 5 multiple-choice questions based on the following diff.
 
@@ -72,7 +64,7 @@ function buildPayload(diff) {
   return payload;
 }
 
-async function generateGeminiResponse(payload, apiKey) {
+async function generateGeminiResponse(payload: any, apiKey: string) {
   const response = await fetch(
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
     {

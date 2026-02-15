@@ -7,10 +7,18 @@ import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { appOctokit, getUserOctokit } from "./octokit.ts";
 import type { JsonArray, JsonValue } from "@prisma/client/runtime/client";
+import { sendDiffToGemini } from "./geminiScript.ts";
 
 const app = new Hono();
 
 const AUTH_COOKIE_NAME = "inquizitive-user";
+
+type QuizResponse = {
+  questions: {
+    question: string;
+    choices: { correct: boolean; description: string }[];
+  }[];
+};
 
 app.use(cors());
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
@@ -32,14 +40,41 @@ app.post("/api/github/webhook", async (c) => {
     if (json.action === "opened") {
       const patchResponse = await fetch(json.pull_request.patch_url);
       const patch = await patchResponse.text();
-      // TODO AI
+
       const userId = json.pull_request.user.id;
       const prName = json.pull_request.title;
+
+      const quizRes = JSON.parse(
+        await sendDiffToGemini(patch, process.env.GEMINI_API_KEY!),
+      ) as QuizResponse;
+
+      const quiz = await db.quiz.create({
+        data: {
+          githubUserId: userId,
+          prName: prName,
+          issueNumber: json.pull_request.number,
+          owner: json.repository.owner.login,
+          repo: json.repository.name,
+          questions: {
+            createMany: {
+              data: quizRes.questions.map((q) => ({
+                questionText: q.question,
+                answerChoices: q.choices,
+              })),
+            },
+          },
+        },
+      });
+
       await appOctokit.rest.issues.createComment({
-        body: "take this quiz or else: <INSERT THE LINK>",
-        owner: json.repository.owner.login,
-        repo: json.repository.name,
-        issue_number: json.pull_request.number,
+        body:
+          "Please take a short quiz to verify the authenticity of this PR. This helps our maintainers to streamline the review process. Take the quiz here: " +
+          process.env.FRONTEND_URL +
+          "/quiz?id=" +
+          quiz.id,
+        owner: quiz.owner,
+        repo: quiz.repo,
+        issue_number: quiz.issueNumber,
       });
     }
   }
