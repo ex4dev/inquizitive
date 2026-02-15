@@ -1,13 +1,13 @@
 import { serve } from "@hono/node-server";
 import { Webhooks } from "@octokit/webhooks";
+import type { JsonArray } from "@prisma/client/runtime/client";
 import { Hono, type Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
-import { getInstallationOctokit, getUserOctokit } from "./octokit.ts";
-import type { JsonArray } from "@prisma/client/runtime/client";
 import { sendDiffToGemini } from "./geminiScript.ts";
+import { getInstallationOctokit, getUserOctokit } from "./octokit.ts";
 
 const app = new Hono();
 
@@ -20,7 +20,7 @@ type QuizResponse = {
   }[];
 };
 
-app.use(cors());
+app.use(cors({ origin: "*", credentials: true }));
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
 
 app.get("/", (c) => {
