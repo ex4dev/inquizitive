@@ -11,11 +11,24 @@ export async function sendDiffToGemini(diff: string, apiKey: string) {
 
 function buildPayload(diff: string) {
   const prompt = `
-        Generate 5 multiple-choice questions based on the following diff.
+       Create a quiz about the .diff file. 
+       Depending on the number of lines of the .diff file, 
+       the number of questions as well as the type of questions will be different:
+       - If the .diff file is 1 line, ask 1 question. 
+       If the .diff file is 2-20 lines, ask 2 questions.
+       If the .diff file is 21-50 lines, ask 3 questions.
+       If the .diff file is 51-100 lines, ask 4 questions. One question has to be about security and performance of the new code.
+       If the .diff file is 101+ lines, ask 5 questions. One question has to be about security and performance. ANother question has to be about this breaks old functionality.
 
         Each question must:
         - Have 4 answer choices
-        - Include exactly one correct answer
+        - Include exactly one correct answer, where it has a...
+         25% chance of being a, 
+         25% chance of being b,
+         25% chance of being c,
+         and 25% chance of being d. \n
+
+
     Diff: ${diff}`;
 
   const payload = {
