@@ -303,7 +303,11 @@ app.post("/api/submit/:quizId", async (c) => {
       issue_number: quiz.issueNumber,
     });
   }
-  return c.newResponse(null, 200);
+  return c.text(
+    "<!DOCTYPE html><html><body><script>window.close();</script></body></html>",
+    200,
+    { "Content-Type": "text/html" },
+  );
 });
 
 serve(
