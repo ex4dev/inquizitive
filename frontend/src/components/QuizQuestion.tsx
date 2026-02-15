@@ -8,7 +8,7 @@ export default function QuizQuestion({
   answerChoices: string[];
 }) {
   return (
-    <fieldset className="bg-gray-800 rounded-2xl border-2 mt-2 mb-2 p-5 flex flex-col">
+    <fieldset className="bg-zinc-800 rounded-2xl border-2 border-zinc-600 mt-2 mb-2 p-5 flex flex-col">
       <h2 className="mt-0">{questionText}</h2>
       {answerChoices.map((answer, idx) => (
         <AnswerChoice questionId={questionId} answer={answer} answerIdx={idx} />

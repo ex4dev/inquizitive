@@ -46,7 +46,7 @@ export function Quiz({ id }: { id: number }) {
           value="Submit"
           formMethod="post"
           formAction={BASE_URL + "api/submit/" + id}
-          className="bg-green-400 p-3 rounded-xl"
+          className="bg-white rounded-md flex items-center justify-center gap-2 px-3 py-1 text-black hover:bg-gray-200 transition-colors mt-4"
         />
       </form>
     </div>
