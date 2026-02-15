@@ -3,7 +3,6 @@ import { Webhooks } from "@octokit/webhooks";
 import type { JsonArray } from "@prisma/client/runtime/client";
 import { Hono, type Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { cors } from "hono/cors";
 import { randomUUID } from "node:crypto";
 import { db } from "./db.ts";
 import { sendDiffToGemini } from "./geminiScript.ts";
@@ -20,7 +19,13 @@ type QuizResponse = {
   }[];
 };
 
-app.use(cors({ origin: process.env.FRONTEND_URL!, credentials: true }));
+app.use(async (c, next) => {
+  c.header("Access-Control-Allow-Credentials", "true");
+  c.header("Access-Control-Allow-Headers", "Cookie");
+  c.header("Access-Control-Allow-Methods", "GET, POST");
+  c.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  await next();
+});
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
 
 app.get("/", (c) => {
@@ -122,7 +127,7 @@ app.get("/api/quiz/:quizId", async (c) => {
     repo: quiz.repo,
     questions: quiz.questions.map((q) => ({
       id: q.id,
-      choices: (q.answerChoices as any[]).map((choice) => choice.question),
+      choices: (q.answerChoices as any[]).map((choice) => choice.description),
       text: q.questionText,
       // Only show answers if the person viewing the quiz has write access to the repository that the quiz was created for
       ...(canWrite
@@ -170,7 +175,11 @@ app.get("/api/auth/callback", async (c) => {
     data: { token: randomUUID(), user: { connect: { id: user.id } } },
   });
 
-  setCookie(c, AUTH_COOKIE_NAME, session.token, { httpOnly: true });
+  setCookie(c, AUTH_COOKIE_NAME, session.token, {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
+  });
 
   return c.redirect(process.env.FRONTEND_URL!);
 });
