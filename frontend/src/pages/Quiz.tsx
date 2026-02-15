@@ -26,8 +26,9 @@ export function Quiz({ id }: { id: number }) {
 
   return (
     <div className="prose prose-invert m-auto mt-5">
-      <h1>Inquizitive - {quiz?.prName}</h1>
-      <p>
+      <p className="mb-0">Inquizitive</p>
+      <h1 className="playfair-display mb-0">{quiz?.prName}</h1>
+      <p className="mb-8">
         Please take a short quiz to verify the authenticity of this PR. This
         helps our maintainers to streamline the review process.
       </p>

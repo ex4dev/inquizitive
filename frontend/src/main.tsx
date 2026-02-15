@@ -1,9 +1,10 @@
+import "@fontsource/playfair-display";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router";
-import Quiz from "./pages/Quiz.tsx";
 import MaintainerSetup from "./pages/MaintainerSetup.tsx";
+import Quiz from "./pages/Quiz.tsx";
 
 const queryClient = new QueryClient();
 

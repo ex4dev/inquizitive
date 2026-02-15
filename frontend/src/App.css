@@ -2,5 +2,8 @@
 @plugin "@tailwindcss/typography";
 
 body {
-    background-color: #111111;
+  background-color: #111111;
+}
+.playfair-display {
+  font-family: "Playfair Display", sans-serif;
 }
