@@ -45,7 +45,11 @@ function buildPayload(diff: string) {
                   items: {
                     type: "object",
                     properties: {
-                      correct: { type: "boolean" },
+                      correct: {
+                        type: "boolean",
+                        description:
+                          "True if this answer is the correct answer, false otherwise",
+                      },
                       description: {
                         type: "string",
                         descrption: "The text of the answer choice",

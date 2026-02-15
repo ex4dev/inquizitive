@@ -47,7 +47,7 @@ export function Quiz({ id }: { id: number }) {
           value="Submit"
           formMethod="post"
           formAction="https://inquizitive-rho.vercel.app/api/submit"
-          className="bg-green-400 p-3 rounded-xl"
+          className="bg-green-400 p-3 rounded-xl hover:bg-green-300 focus:bg-green-500 transition-all"
         />
       </form>
     </div>

@@ -23,10 +23,6 @@ type QuizResponse = {
 app.use(cors());
 const webhooks = new Webhooks({ secret: process.env.GITHUB_WEBHOOK_SECRET! });
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
-
 app.post("/api/github/webhook", async (c) => {
   // Handle GitHub webhook payloads
   const signature = c.req.header("x-hub-signature-256");
